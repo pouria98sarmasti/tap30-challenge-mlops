@@ -75,5 +75,5 @@ def read_config(config_path):
             config = yaml.safe_load(file)
             return config
     except yaml.YAMLError as e:
-        logger.error(f"Error parsing YAML file {config_path}: {e}")
+        logger.error(f"Error parsing YAML file {config_path}: {str(e)}")
         raise e
