@@ -1,0 +1,20 @@
+[project]
+name = "tap30-challenge-mlops"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "pyyaml>=6.0.2",
+]
+
+
+[tool.black]
+line-length = 88
+include = '\.pyi?|\.ipynb$'
+
+[tool.isort]
+profile = 'black'
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+]
