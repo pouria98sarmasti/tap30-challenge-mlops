@@ -112,7 +112,7 @@ class DataIngestion:
             test_data (list): The test data records.
         """
 
-        header = "time, row, col, demand\n"
+        header = "time,row,col,demand\n"
 
         data_files = [
             ("train", train_data),
@@ -125,13 +125,15 @@ class DataIngestion:
             with open(output_file, "w") as f:
                 f.write(header)
                 for row in data:
-                    f.write(f"{row[0]}, {row[1]}, {row[2]}, {row[3]}\n")
+                    f.write(f"{row[0]},{row[1]},{row[2]},{row[3]}\n")
             logger.info(f"Saved {name} data with {len(data)} records to {output_file}")
 
         logger.info(f"Split summary:")
         logger.info(f"Train set: {len(train_data)} records")
         logger.info(f"Validation set: {len(val_data)} records")
-        logger.info(f"Test set (demand=-1): {len(test_data)} records")
+        logger.info(
+            f"Test set (demand={self.DEMAND_VALUE_WITHHELD}): {len(test_data)} records"
+        )
 
     def run(self):
         """

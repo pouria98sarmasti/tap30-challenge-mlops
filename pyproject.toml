@@ -3,6 +3,8 @@ name = "tap30-challenge-mlops"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
+    "matplotlib>=3.10.3",
+    "pandas>=2.3.0",
     "pyyaml>=6.0.2",
 ]
 
