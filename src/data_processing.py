@@ -128,7 +128,7 @@ class DataProcessing:
         processed_test_data = processed_test_data[column_headers]
 
         processed_train_data.to_csv(self.processed_dir / "train.csv", index=False)
-        processed_val_data.to_csv(self.processed_dir / "val.csv", index=False)
+        processed_val_data.to_csv(self.processed_dir / "validation.csv", index=False)
         processed_test_data.to_csv(self.processed_dir / "test.csv", index=False)
 
         logger.info(f"Processed data saved to {self.processed_dir}")
