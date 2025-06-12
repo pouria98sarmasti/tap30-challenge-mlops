@@ -23,9 +23,8 @@ For processing use the run() method.
 from pathlib import Path
 
 import pandas as pd
-from pandas._libs import parsers
 
-from logger import get_logger
+from .logger import get_logger
 
 logger = get_logger(Path(__file__).name)
 

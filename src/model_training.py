@@ -28,7 +28,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import root_mean_squared_error
 
-from logger import get_logger
+from .logger import get_logger
 
 logger = get_logger(Path(__file__).name)
 

@@ -23,7 +23,7 @@ import random
 from pathlib import Path
 from urllib.request import urlopen
 
-from logger import get_logger
+from .logger import get_logger
 
 logger = get_logger(Path(__file__).name)
 

@@ -1,6 +1,9 @@
 [project]
 name = "tap30-challenge-mlops"
 version = "0.1.0"
+authors = [
+    { name = "Pouria Sarmasti", email = "pouria98sarmasti@gmail.com" }
+]
 requires-python = ">=3.13"
 dependencies = [
     "matplotlib>=3.10.3",
@@ -9,6 +12,15 @@ dependencies = [
     "pyyaml>=6.0.2",
     "scikit-learn>=1.7.0",
 ]
+
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
 
 
 [tool.black]
