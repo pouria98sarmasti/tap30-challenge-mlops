@@ -22,6 +22,8 @@ For training use the run() method.
 
 from pathlib import Path
 
+import joblib
+import mlflow
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import root_mean_squared_error
@@ -34,25 +36,11 @@ logger = get_logger(Path(__file__).name)
 class ModelTraining:
 
     def __init__(self, config):
-        """Initialize the ModelTraining class.
-
-        Parameters
-        ----------
-        config : dict
-            Configuration dictionary containing model training parameters.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> config = {"model_training": {...}, "data_ingestion": {...}}
-        >>> model_trainer = ModelTraining(config)
-        """
         self.model_training_config = config["model_training"]
         artifact_dir = config["data_ingestion"]["artifact_dir"]
         self.processed_dir = Path(artifact_dir) / "processed"
+        self.model_output_dir = Path(artifact_dir) / "model"
+        self.model_output_dir.mkdir(parents=True, exist_ok=True)
 
     def load_data(self):
         """Load training and validation data from processed directory.
@@ -70,8 +58,10 @@ class ModelTraining:
         --------
         >>> train_data, val_data = model_trainer.load_data()
         """
-        train_data = pd.read_csv(self.processed_dir / "train.csv")
-        val_data = pd.read_csv(self.processed_dir / "validation.csv")
+        self.train_path = self.processed_dir / "train.csv"
+        self.val_path = self.processed_dir / "validation.csv"
+        train_data = pd.read_csv(self.train_path)
+        val_data = pd.read_csv(self.val_path)
         return train_data, val_data
 
     def build_model(self):
@@ -147,9 +137,33 @@ class ModelTraining:
         X_val, y_val = val_data.drop(columns=["demand"]), val_data["demand"]
         y_pred = model.predict(X_val)
         y_pred = [round(y) for y in y_pred]
-        rmse = root_mean_squared_error(y_val, y_pred)
-        logger.info(f"Out-of-bag RMSE: {model.oob_score_}")
-        logger.info(f"RMSE for validation data: {rmse}")
+
+        self.rmse = root_mean_squared_error(y_val, y_pred)
+        self.oob_score = model.oob_score_
+        logger.info(f"Out-of-bag RMSE: {self.oob_score}")
+        logger.info(f"RMSE for validation data: {self.rmse}")
+
+    def save(self, model):
+        """Save the trained model to the model output directory.
+
+        Parameters
+        ----------
+        model : sklearn.ensemble.RandomForestRegressor
+            The trained model to save.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> model_trainer.save(model)
+        >>> # Logs: Model successfully saved to {self.model_output_dir}
+        """
+
+        self.model_output_path = self.model_output_dir / "rf.joblib"
+        joblib.dump(model, self.model_output_path, compress=("lzma", 3))
+        logger.info(f"Model successfully saved to {self.model_output_dir}")
 
     def run(self):
         """Run the complete model training pipeline.
@@ -173,9 +187,28 @@ class ModelTraining:
         >>> # Logs: RMSE for validation data: 0.92
         >>> # Logs: Model Training completed successfully.
         """
-        logger.info("Model Training started.")
-        train_data, val_data = self.load_data()
-        model = self.build_model()
-        self.train(model, train_data)
-        self.evaluate(model, val_data)
-        logger.info("Model Training completed successfully.")
+
+        mlflow.set_experiment("tap30-challenge-mlops")
+        with mlflow.start_run():
+            logger.info("Model Training started.")
+            logger.info("MLflow started.")
+            mlflow.set_tag("model_type", "Random_forest")
+
+            train_data, val_data = self.load_data()
+            mlflow.log_artifact(self.train_path, "datasets")
+            mlflow.log_artifact(self.val_path, "datasets")
+
+            model = self.build_model()
+            self.train(model, train_data)
+            self.evaluate(model, val_data)
+            mlflow.log_metric("rmse", self.rmse)
+            mlflow.log_metric("oob_score", self.oob_score)
+
+            self.save(model)
+            mlflow.log_artifact(self.model_output_path, "models")
+
+            params = model.get_params()
+            mlflow.log_params(params)
+
+            logger.info("MLflow completed successfully.")
+            logger.info("Model Training completed successfully.")
