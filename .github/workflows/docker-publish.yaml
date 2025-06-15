@@ -1,0 +1,33 @@
+name: Build and Pulish docker image
+
+on:
+  release:
+    types: [published]
+
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: setup doecker buildx
+        uses: docker/setup-buildx-action@v3.10.0
+      
+      - name: login to docker hub
+        uses: docker/login-action@v3.4.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+      - name: Extract version from release
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Build and publish docker image
+        uses: docker/build-publish-action@v6.18.0
+        with:
+          context: .
+          push: true
+          tags: pouria98sarmasti/tap30-challenge-mlops:${{ env.RELEASE_VERSION }}
