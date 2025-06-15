@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tap30-challenge-mlops
+  namespace: tap30
+  labels:
+    app: tap30-challenge-mlops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tap30-challenge-mlops
+  template:
+    metadata:
+      labels:
+        app: tap30-challenge-mlops
+    spec:
+      containers:
+      - name: tap30-challenge-mlops
+        image: pouria98sarmasti/tap30-challenge-mlops:0.1.0
+        ports:
+        - containerPort: 8080
+
